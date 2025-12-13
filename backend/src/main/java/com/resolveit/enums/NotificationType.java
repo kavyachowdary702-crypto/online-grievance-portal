@@ -1,0 +1,10 @@
+package com.resolveit.enums;
+
+public enum NotificationType {
+    COMPLAINT_ESCALATED,
+    COMPLAINT_ASSIGNED,
+    COMPLAINT_STATUS_UPDATE,
+    COMPLAINT_DEADLINE_UPDATE,
+    SYSTEM_ANNOUNCEMENT,
+    ESCALATION_ALERT
+}
