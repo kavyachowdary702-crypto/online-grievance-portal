@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { complaintService } from '../services/api';
 import FileViewer from '../components/FileViewer';
+import MaterialButton from '../components/MaterialButton';
 import './AdminDashboard.css'; // Reusing the same styles
 
 const OfficerDashboard = () => {
@@ -160,7 +161,7 @@ const OfficerDashboard = () => {
             </div>
 
             <div style={{ overflowX: 'auto' }}>
-              <table className="table">
+              <table className="md-table">
                 <thead>
                   <tr>
                     <th>ID</th>
@@ -179,24 +180,24 @@ const OfficerDashboard = () => {
                     const daysLeft = getDaysUntilDeadline(complaint.deadline);
                     return (
                       <tr key={complaint.id} className={isOverdue(complaint.deadline, complaint.status) ? 'row-overdue' : ''}>
-                        <td>{complaint.id}</td>
-                        <td>{complaint.username}</td>
-                        <td>{complaint.category}</td>
-                        <td style={{ maxWidth: 200 }}>
+                        <td data-label="ID">{complaint.id}</td>
+                        <td data-label="User">{complaint.username}</td>
+                        <td data-label="Category">{complaint.category}</td>
+                        <td data-label="Description" style={{ maxWidth: 200 }}>
                           {(complaint.description || '').substring(0, 50)}
                           {(complaint.description || '').length > 50 ? '...' : ''}
                         </td>
-                        <td>
+                        <td data-label="Urgency">
                           <span className={`urgency-badge ${getUrgencyClass(complaint.urgency)}`}>
                             {complaint.urgency}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="Status">
                           <span className={`status-badge ${getStatusClass(complaint.status)}`}>
                             {complaint.status.replace('_', ' ')}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="Deadline">
                           {complaint.deadline ? (
                             <span className={getDeadlineClass(complaint.deadline, complaint.status)}>
                               {new Date(complaint.deadline).toLocaleDateString()}
@@ -205,7 +206,7 @@ const OfficerDashboard = () => {
                             <span style={{ color: '#666' }}>No deadline</span>
                           )}
                         </td>
-                        <td>
+                        <td data-label="Days Left">
                           {daysLeft !== null ? (
                             <span className={getDeadlineClass(complaint.deadline, complaint.status)}>
                               {daysLeft < 0 ? `${Math.abs(daysLeft)} days overdue` : 
@@ -216,23 +217,23 @@ const OfficerDashboard = () => {
                             '-'
                           )}
                         </td>
-                        <td>
+                        <td data-label="Actions">
                           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                            <button 
+                            <MaterialButton 
                               onClick={() => setSelectedComplaint(complaint)} 
-                              className="btn btn-primary" 
-                              style={{ fontSize: 12, padding: '5px 10px' }}
+                              variant="contained" size="sm"
+                              style={{ fontSize: 12 }}
                             >
                               View
-                            </button>
+                            </MaterialButton>
                             {complaint.status !== 'COMPLETED' && complaint.status !== 'RESOLVED' && (
-                              <button 
+                              <MaterialButton 
                                 onClick={() => markCompleted(complaint.id)} 
-                                className="btn btn-success" 
-                                style={{ fontSize: 12, padding: '5px 10px' }}
+                                variant="contained" size="sm" 
+                                style={{ fontSize: 12 }}
                               >
                                 Complete
-                              </button>
+                              </MaterialButton>
                             )}
                           </div>
                         </td>
@@ -290,21 +291,19 @@ const OfficerDashboard = () => {
               <h4>Actions</h4>
               <div className="action-buttons" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
                 {selectedComplaint.status !== 'COMPLETED' && selectedComplaint.status !== 'RESOLVED' && (
-                  <button 
+                  <MaterialButton 
                     onClick={() => markCompleted(selectedComplaint.id)} 
-                    className="btn btn-success"
+                    variant="contained"
                   >
                     Mark as Completed
-                  </button>
+                  </MaterialButton>
                 )}
                 
                 {selectedComplaint.deadline && (
-                  <input
-                    type="datetime-local"
-                    onChange={(e) => updateDeadline(selectedComplaint.id, e.target.value)}
-                    style={{ padding: '8px', marginLeft: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
-                    title="Update deadline"
-                  />
+                  <div className={`md-field`} style={{ width: 230, marginLeft: '10px' }}>
+                    <input id="update-deadline" className="md-input" type="datetime-local" onChange={(e) => updateDeadline(selectedComplaint.id, e.target.value)} title="Update deadline" />
+                    <label className="md-label" htmlFor="update-deadline">Update deadline</label>
+                  </div>
                 )}
               </div>
             </div>
@@ -312,27 +311,25 @@ const OfficerDashboard = () => {
             {/* Internal Notes */}
             <div style={{ marginTop: 20 }}>
               <h4>Add Internal Note</h4>
-              <div className="form-group" style={{ marginTop: 10 }}>
-                <textarea 
-                  value={comment} 
-                  onChange={(e) => setComment(e.target.value)} 
-                  placeholder="Add an internal note (visible to officers and admins only)..." 
-                  style={{ minHeight: 60, width: '100%' }} 
-                />
+              <div style={{ marginTop: 10 }}>
+                <div className={`md-field ${comment ? 'has-value' : ''}`}>
+                  <textarea id="internal-note" className="md-input" value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add an internal note (visible to officers and admins only)..." aria-label="Add internal note" />
+                  <label className="md-label" htmlFor="internal-note">Add an internal note</label>
+                </div>
                 <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-                  <button 
+                  <MaterialButton 
                     onClick={() => addInternalNote(selectedComplaint.id)} 
-                    className="btn btn-primary"
+                    variant="contained"
                   >
                     Add Internal Note
-                  </button>
-                  <button 
+                  </MaterialButton>
+                  <MaterialButton 
                     onClick={() => setSelectedComplaint(null)} 
-                    className="btn btn-danger" 
+                    variant="outlined" 
                     style={{ marginLeft: 'auto' }}
                   >
                     Close
-                  </button>
+                  </MaterialButton>
                 </div>
               </div>
             </div>

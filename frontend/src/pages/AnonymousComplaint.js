@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { complaintService } from '../services/api';
+import MaterialButton from '../components/MaterialButton';
 
 const AnonymousComplaint = () => {
   const [formData, setFormData] = useState({
@@ -88,9 +89,8 @@ const AnonymousComplaint = () => {
           Note: Anonymous complaints cannot be tracked. Create an account to track your complaints.
         </p>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Category</label>
-                        <select name="category" value={formData.category} onChange={handleChange} required>
+          <div className={`md-field ${formData.category ? 'has-value' : ''}`}>
+            <select id="anon-category" className="md-input" name="category" value={formData.category} onChange={handleChange} required>
               <option value="">Select Category</option>
               <option value="TECHNICAL">Technical</option>
               <option value="BILLING">Billing</option>
@@ -104,41 +104,32 @@ const AnonymousComplaint = () => {
               <option value="FEEDBACK">Feedback</option>
               <option value="OTHER">Other</option>
             </select>
+            <label className="md-label" htmlFor="anon-category">Category</label>
           </div>
-          <div className="form-group">
-            <label>Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              placeholder="Describe your complaint in detail..."
-            />
+          <div className={`md-field ${formData.description ? 'has-value' : ''}`}>
+            <textarea id="anon-description" className="md-input" name="description" value={formData.description} onChange={handleChange} required placeholder="Describe your complaint in detail..." />
+            <label className="md-label" htmlFor="anon-description">Description</label>
           </div>
-          <div className="form-group">
-            <label>Urgency</label>
-            <select name="urgency" value={formData.urgency} onChange={handleChange} required>
+          <div className={`md-field ${formData.urgency ? 'has-value' : ''}`}>
+            <select id="anon-urgency" className="md-input" name="urgency" value={formData.urgency} onChange={handleChange} required>
               <option value="LOW">Low</option>
               <option value="MEDIUM">Medium</option>
               <option value="HIGH">High</option>
             </select>
+            <label className="md-label" htmlFor="anon-urgency">Urgency</label>
           </div>
-          <div className="form-group">
-            <label>Attachment (Optional)</label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept="image/*,video/*,.pdf,.doc,.docx"
-            />
+          <div className={`md-field ${file ? 'has-value' : ''}`}>
+            <input id="anon-file" type="file" className="md-input" onChange={handleFileChange} accept="image/*,video/*,.pdf,.doc,.docx" />
+            <label className="md-label" htmlFor="anon-file">Attachment (Optional)</label>
             <small style={{ color: '#666', fontSize: '12px', marginTop: '5px', display: 'block' }}>
               Supported formats: Images, Videos (MP4, AVI, MOV, etc.), PDF, DOC, DOCX. Max size: 50MB
             </small>
           </div>
           {error && <div className="error">{error}</div>}
           {success && <div className="success">{success}</div>}
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', color:'white' }}>
+          <MaterialButton type="submit" variant="contained" fullWidth>
             Submit Anonymous Complaint
-          </button>
+          </MaterialButton>
         </form>
       </div>
     </div>

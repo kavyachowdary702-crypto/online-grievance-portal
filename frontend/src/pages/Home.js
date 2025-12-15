@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import MaterialButton from '../components/MaterialButton';
 
 const Home = () => {
   const { user, isAdmin } = useAuth();
@@ -33,15 +34,13 @@ const Home = () => {
               <h3>Get Started:</h3>
               <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                 <Link to="/anonymous">
-                  <button className="btn btn-primary">Submit Anonymous Complaint</button>
+                  <MaterialButton variant="contained">Submit Anonymous Complaint</MaterialButton>
                 </Link>
                 <Link to="/login">
-                  <button className="btn btn-success">Login to Track Complaints</button>
+                  <MaterialButton variant="contained">Login to Track Complaints</MaterialButton>
                 </Link>
                 <Link to="/signup">
-                  <button className="btn" style={{ backgroundColor: '#6c757d', color: 'white' }}>
-                    Create Account
-                  </button>
+                  <MaterialButton variant="outlined">Create Account</MaterialButton>
                 </Link>
               </div>
             </>
@@ -52,10 +51,10 @@ const Home = () => {
               <h3>User Dashboard:</h3>
               <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                 <Link to="/submit-complaint">
-                  <button className="btn btn-primary">Submit New Complaint</button>
+                  <MaterialButton variant="contained">Submit New Complaint</MaterialButton>
                 </Link>
                 <Link to="/my-complaints">
-                  <button className="btn btn-success">View My Complaints</button>
+                  <MaterialButton variant="contained">View My Complaints</MaterialButton>
                 </Link>
               </div>
             </>
@@ -66,7 +65,7 @@ const Home = () => {
               <h3>Admin Panel:</h3>
               <div style={{ marginTop: '15px' }}>
                 <Link to="/admin/dashboard">
-                  <button className="btn btn-primary">Go to Admin Dashboard</button>
+                  <MaterialButton variant="contained">Go to Admin Dashboard</MaterialButton>
                 </Link>
               </div>
             </>

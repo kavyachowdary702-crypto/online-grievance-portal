@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { complaintService } from '../services/api';
+import MaterialButton from './MaterialButton';
 
 const AutoEscalationDashboard = ({ onClose }) => {
   const [stats, setStats] = useState(null);
@@ -64,58 +65,12 @@ const AutoEscalationDashboard = ({ onClose }) => {
         data: err.response?.data,
         message: err.message
       });
-      
-      let errorMessage = 'Failed to load auto-escalation data';
-      if (err.response?.status === 404) {
-        errorMessage += ': Auto-escalation endpoints not found. Check if backend is running with latest code.';
-      } else if (err.response?.status === 403) {
-        errorMessage += ': Access denied. Please ensure you are logged in as an admin.';
-      } else if (err.response?.status === 401) {
-        errorMessage += ': Authentication failed. Please login again.';
-      } else if (err.code === 'ECONNREFUSED' || err.message.includes('Network Error')) {
-        errorMessage += ': Cannot connect to backend. Please ensure the backend server is running on port 8081.';
-      } else if (err.message) {
-        errorMessage += ': ' + err.message;
-      }
-      
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+      setError('Failed to load auto-escalation data.');
+      setCandidates([]);
+      setStats(null);
+      setConfig(null);
     }
-  };
 
-  const triggerManualCheck = async () => {
-    try {
-      setError('');
-      setSuccess('');
-      console.log('Triggering manual escalation check...');
-      
-      const response = await complaintService.triggerEscalationCheck();
-      console.log('Manual escalation response:', response);
-      
-      setSuccess('Manual escalation check triggered successfully!');
-      setTimeout(() => {
-        setSuccess('');
-        fetchAllData(); // Refresh data
-      }, 2000);
-    } catch (err) {
-      console.error('Error triggering escalation check:', err);
-      console.error('Error response:', err.response?.data);
-      console.error('Error status:', err.response?.status);
-      
-      let errorMessage = 'Failed to trigger escalation check';
-      if (err.response?.data?.message) {
-        errorMessage += ': ' + err.response.data.message;
-      } else if (err.response?.status === 403) {
-        errorMessage += ': Access denied. Admin privileges required.';
-      } else if (err.response?.status === 404) {
-        errorMessage += ': Endpoint not found. Check if backend is running.';
-      } else if (err.message) {
-        errorMessage += ': ' + err.message;
-      }
-      
-      setError(errorMessage);
-    }
   };
 
   const testService = async () => {
@@ -123,15 +78,15 @@ const AutoEscalationDashboard = ({ onClose }) => {
       setError('');
       setSuccess('');
       console.log('Testing auto-escalation service...');
-      
+
       const response = await complaintService.testAutoEscalationService();
-      console.log('Test service response:', response);
-      
-      setSuccess('Service test completed: ' + response.data.message);
+      console.log('Service test response:', response);
+
+      setSuccess('Service test completed: ' + (response.data?.message || 'OK'));
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       console.error('Error testing service:', err);
-      
+
       let errorMessage = 'Service test failed';
       if (err.response?.data?.message) {
         errorMessage += ': ' + err.response.data.message;
@@ -142,8 +97,23 @@ const AutoEscalationDashboard = ({ onClose }) => {
       } else if (err.message) {
         errorMessage += ': ' + err.message;
       }
-      
+
       setError(errorMessage);
+    }
+  };
+
+  const triggerManualCheck = async () => {
+    try {
+      setError('');
+      setSuccess('');
+      const response = await complaintService.triggerEscalationCheck();
+      setSuccess(response.data?.message || 'Escalation check triggered');
+      setTimeout(() => setSuccess(''), 3000);
+      // Refresh candidates after triggering
+      fetchAllData();
+    } catch (err) {
+      console.error('Failed to trigger escalation check:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to trigger escalation check');
     }
   };
 
@@ -231,10 +201,10 @@ const AutoEscalationDashboard = ({ onClose }) => {
         backgroundColor: 'white', borderRadius: '8px', maxWidth: '1000px',
         maxHeight: '90vh', overflow: 'auto', margin: '20px', width: '100%'
       }}>
-        <div style={{
-          padding: '20px', borderBottom: '1px solid #e0e0e0',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-        }}>
+          <div style={{
+            padding: '20px', borderBottom: '1px solid #e0e0e0',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+          }}>
           <div>
             <h2 style={{ margin: 0 }}>🤖 Automated Escalation System</h2>
             {userInfo && (
@@ -249,15 +219,7 @@ const AutoEscalationDashboard = ({ onClose }) => {
               </div>
             )}
           </div>
-          <button 
-            onClick={onClose}
-            style={{
-              backgroundColor: '#dc3545', color: 'white', border: 'none',
-              padding: '8px 16px', borderRadius: '4px', cursor: 'pointer'
-            }}
-          >
-            ✕ Close
-          </button>
+          <MaterialButton onClick={onClose} variant="outlined">✕ Close</MaterialButton>
         </div>
 
         <div style={{ padding: '20px' }}>
@@ -350,36 +312,9 @@ const AutoEscalationDashboard = ({ onClose }) => {
           {/* Manual Trigger Section */}
           <div style={{ marginBottom: '30px', textAlign: 'center' }}>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button
-                onClick={testConnection}
-                style={{
-                  backgroundColor: '#17a2b8', color: 'white', border: 'none',
-                  padding: '10px 20px', borderRadius: '6px', cursor: 'pointer',
-                  fontSize: '14px', fontWeight: 'bold'
-                }}
-              >
-                🔗 Test Connection
-              </button>
-              <button
-                onClick={testService}
-                style={{
-                  backgroundColor: '#28a745', color: 'white', border: 'none',
-                  padding: '10px 20px', borderRadius: '6px', cursor: 'pointer',
-                  fontSize: '14px', fontWeight: 'bold'
-                }}
-              >
-                🔍 Test Service
-              </button>
-              <button
-                onClick={triggerManualCheck}
-                style={{
-                  backgroundColor: '#007bff', color: 'white', border: 'none',
-                  padding: '12px 24px', borderRadius: '6px', cursor: 'pointer',
-                  fontSize: '16px', fontWeight: 'bold'
-                }}
-              >
-                🔄 Trigger Manual Escalation Check
-              </button>
+              <MaterialButton onClick={testConnection} variant="outlined">🔗 Test Connection</MaterialButton>
+              <MaterialButton onClick={testService} variant="contained">🔍 Test Service</MaterialButton>
+              <MaterialButton onClick={triggerManualCheck} variant="contained">🔄 Trigger Manual Escalation Check</MaterialButton>
             </div>
             <div style={{ marginTop: '8px', fontSize: '12px', color: '#6c757d' }}>
               Test connection first, then test service functionality, then manually run escalation check

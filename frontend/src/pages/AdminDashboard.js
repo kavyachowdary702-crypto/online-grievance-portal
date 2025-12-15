@@ -3,6 +3,7 @@ import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { complaintService } from '../services/api';
 import AutoEscalationDashboard from '../components/AutoEscalationDashboard';
+import MaterialButton from '../components/MaterialButton';
 import FileViewer from '../components/FileViewer';
 import './AdminDashboard.css';
 
@@ -704,8 +705,8 @@ const AdminDashboard = () => {
             <option value="HIGH">High</option>
           </select>
 
-          <button onClick={applyFilters} className="btn btn-primary">Apply Filters</button>
-          <button onClick={clearFilters} className="btn" style={{ backgroundColor: '#6c757d', color: 'white' }}>Clear</button>
+          <MaterialButton onClick={applyFilters} variant="contained">Apply Filters</MaterialButton>
+          <MaterialButton onClick={clearFilters} variant="outlined">Clear</MaterialButton>
         </div>
       </div>
 
@@ -768,7 +769,7 @@ const AdminDashboard = () => {
         </div>
 
         <div style={{ overflowX: 'auto' }}>
-          <table className="table">
+          <table className="md-table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -789,10 +790,8 @@ const AdminDashboard = () => {
               {currentComplaints.map((c) => {
                 const warning = getEscalationWarning(c);
                 return (
-                <tr key={c.id} style={{
-                  backgroundColor: getRowBackgroundColor(c)
-                }}>
-                  <td>
+                <tr key={c.id} style={{ backgroundColor: getRowBackgroundColor(c) }}>
+                  <td data-label="ID">
                     {c.id}
                     {c.isEscalated && <span style={{ marginLeft: '5px', color: '#dc3545', fontSize: '12px' }}>🔺</span>}
                     {warning && (
@@ -801,16 +800,16 @@ const AdminDashboard = () => {
                       </div>
                     )}
                   </td>
-                  <td>{c.username}</td>
-                  <td>{c.category}</td>
-                  <td style={{ maxWidth: 200 }}>{(c.description || '').substring(0, 50)}{(c.description || '').length > 50 ? '...' : ''}</td>
-                  <td>
+                  <td data-label="User">{c.username}</td>
+                  <td data-label="Category">{c.category}</td>
+                  <td data-label="Description" style={{ maxWidth: 200 }}>{(c.description || '').substring(0, 50)}{(c.description || '').length > 50 ? '...' : ''}</td>
+                  <td data-label="Urgency">
                     <span className={`urgency-badge urgency-${c.urgency.toLowerCase()}`}>
                       {c.urgency}
                     </span>
                   </td>
-                  <td><span className={`status-badge ${getStatusClass(c.status)}`}>{c.status.replace('_', ' ')}</span></td>
-                  <td>
+                  <td data-label="Status"><span className={`status-badge ${getStatusClass(c.status)}`}>{c.status.replace('_', ' ')}</span></td>
+                  <td data-label="Assigned To">
                     {c.assignedToUsername ? (
                       <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>
                         {c.assignedToUsername}
@@ -820,7 +819,7 @@ const AdminDashboard = () => {
                     )}
                   </td>
                   {activeTab === 'escalated' && (
-                    <td>
+                    <td data-label="Escalated To">
                       {c.escalatedToUsername ? (
                         <span style={{ color: '#dc3545', fontWeight: 'bold' }}>
                           {c.escalatedToUsername}
@@ -830,7 +829,7 @@ const AdminDashboard = () => {
                       )}
                     </td>
                   )}
-                  <td>
+                  <td data-label="Deadline">
                     {c.deadline ? (
                       <span style={{ 
                         color: new Date(c.deadline) < new Date() ? '#d32f2f' : '#1976d2',
@@ -844,9 +843,9 @@ const AdminDashboard = () => {
                       <span style={{ color: '#666' }}>-</span>
                     )}
                   </td>
-                  <td>{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-'}</td>
+                  <td data-label="Date">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-'}</td>
                   {activeTab === 'escalated' && (
-                    <td>
+                    <td data-label="Escalated Date">
                       {c.escalatedAt ? (
                         <span style={{ color: '#dc3545', fontSize: '12px' }}>
                           {new Date(c.escalatedAt).toLocaleDateString()}
@@ -854,7 +853,7 @@ const AdminDashboard = () => {
                       ) : '-'}
                     </td>
                   )}
-                  <td>
+                  <td data-label="Actions">
                     <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                       <button 
                         onClick={() => setSelectedComplaint(c)} 
@@ -1123,16 +1122,14 @@ const AdminDashboard = () => {
                 </ul>
               ) : <p>No internal notes yet</p>}
 
-              <div className="form-group" style={{ marginTop: 10  }}>
-                <textarea 
-                  value={comment} 
-                  onChange={(e) => setComment(e.target.value)} 
-                  placeholder="Add an internal note (visible to officers and admins only)..." 
-                  style={{ minHeight: 60, width: '100%' }} 
-                />
+              <div style={{ marginTop: 10  }}>
+                <div className={`md-field ${comment ? 'has-value' : ''}`}>
+                  <textarea id="admin-internal-note" className="md-input" value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add an internal note (visible to officers and admins only)..." />
+                  <label className="md-label" htmlFor="admin-internal-note">Add an internal note</label>
+                </div>
                 <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-                  <button onClick={() => addComment(selectedComplaint.id)} className="btn btn-primary">Add Internal Note</button>
-                  <button onClick={() => setSelectedComplaint(null)} className="btn btn-danger" style={{ marginLeft: 'auto' }}>Close</button>
+                  <MaterialButton onClick={() => addComment(selectedComplaint.id)} variant="contained">Add Internal Note</MaterialButton>
+                  <MaterialButton onClick={() => setSelectedComplaint(null)} variant="outlined" style={{ marginLeft: 'auto' }}>Close</MaterialButton>
                 </div>
               </div>
             </div>
@@ -1175,13 +1172,8 @@ const AdminDashboard = () => {
               </div>
             )}
             
-            <div className="form-group" style={{ marginBottom: 15 }}>
-              <label><strong>Select Officer:</strong></label>
-              <select 
-                value={assignmentData.officerId} 
-                onChange={(e) => setAssignmentData(prev => ({ ...prev, officerId: e.target.value }))}
-                style={{ width: '100%', padding: 10, marginTop: 5, border: '1px solid #ccc', borderRadius: 4 }}
-              >
+            <div className={`md-field ${assignmentData.officerId ? 'has-value' : ''}`} style={{ marginBottom: 15 }}>
+              <select id="assign-officer" className="md-input" value={assignmentData.officerId} onChange={(e) => setAssignmentData(prev => ({ ...prev, officerId: e.target.value }))}>
                 <option value="">Choose an officer...</option>
                 {officers.map(officer => (
                   <option key={officer.id} value={officer.id}>
@@ -1189,26 +1181,17 @@ const AdminDashboard = () => {
                   </option>
                 ))}
               </select>
+              <label className="md-label" htmlFor="assign-officer"><strong>Select Officer:</strong></label>
             </div>
 
-            <div className="form-group" style={{ marginBottom: 15 }}>
-              <label><strong>Deadline (Optional):</strong></label>
-              <input
-                type="datetime-local"
-                value={assignmentData.deadline}
-                onChange={(e) => setAssignmentData(prev => ({ ...prev, deadline: e.target.value }))}
-                style={{ width: '100%', padding: 10, marginTop: 5, border: '1px solid #ccc', borderRadius: 4 }}
-              />
+            <div className={`md-field ${assignmentData.deadline ? 'has-value' : ''}`} style={{ marginBottom: 15 }}>
+              <input id="assign-deadline" className="md-input" type="datetime-local" value={assignmentData.deadline} onChange={(e) => setAssignmentData(prev => ({ ...prev, deadline: e.target.value }))} />
+              <label className="md-label" htmlFor="assign-deadline"><strong>Deadline (Optional):</strong></label>
             </div>
 
-            <div className="form-group" style={{ marginBottom: 15 }}>
-              <label><strong>Assignment Comment (Optional):</strong></label>
-              <textarea
-                value={assignmentData.comment}
-                onChange={(e) => setAssignmentData(prev => ({ ...prev, comment: e.target.value }))}
-                placeholder="Add a comment about this assignment..."
-                style={{ width: '100%', minHeight: 60, padding: 10, marginTop: 5, border: '1px solid #ccc', borderRadius: 4 }}
-              />
+            <div className={`md-field ${assignmentData.comment ? 'has-value' : ''}`} style={{ marginBottom: 15 }}>
+              <textarea id="assign-comment" className="md-input" value={assignmentData.comment} onChange={(e) => setAssignmentData(prev => ({ ...prev, comment: e.target.value }))} placeholder="Add a comment about this assignment..." />
+              <label className="md-label" htmlFor="assign-comment"><strong>Assignment Comment (Optional):</strong></label>
             </div>
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
@@ -1270,13 +1253,8 @@ const AdminDashboard = () => {
               </div>
             )}
             
-            <div className="form-group" style={{ marginBottom: 15 }}>
-              <label><strong>Escalation Reason: <span style={{color: 'red'}}>*</span></strong></label>
-              <select 
-                value={escalationData.reason} 
-                onChange={(e) => setEscalationData(prev => ({ ...prev, reason: e.target.value }))}
-                style={{ width: '100%', padding: 10, marginTop: 5, border: '1px solid #ccc', borderRadius: 4 }}
-              >
+            <div className={`md-field ${escalationData.reason ? 'has-value' : ''}`} style={{ marginBottom: 15 }}>
+              <select id="escalation-reason" className="md-input" value={escalationData.reason} onChange={(e) => setEscalationData(prev => ({ ...prev, reason: e.target.value }))}>
                 <option value="">Select escalation reason...</option>
                 <option value="Overdue Deadline">Overdue Deadline - Past deadline without resolution</option>
                 <option value="High Priority">High Priority - Requires immediate attention</option>
@@ -1288,28 +1266,20 @@ const AdminDashboard = () => {
                 <option value="Legal/Compliance">Legal/Compliance - Legal or compliance issue</option>
                 <option value="Other">Other - See additional comments</option>
               </select>
+              <label className="md-label" htmlFor="escalation-reason"><strong>Escalation Reason: <span style={{color: 'red'}}>*</span></strong></label>
             </div>
 
-            <div className="form-group" style={{ marginBottom: 15 }}>
-              <label><strong>Priority Level:</strong></label>
-              <select 
-                value={escalationData.priority} 
-                onChange={(e) => setEscalationData(prev => ({ ...prev, priority: e.target.value }))}
-                style={{ width: '100%', padding: 10, marginTop: 5, border: '1px solid #ccc', borderRadius: 4 }}
-              >
+            <div className={`md-field ${escalationData.priority ? 'has-value' : ''}`} style={{ marginBottom: 15 }}>
+              <select id="escalation-priority" className="md-input" value={escalationData.priority} onChange={(e) => setEscalationData(prev => ({ ...prev, priority: e.target.value }))}>
                 <option value="HIGH">🟡 HIGH - Standard escalation</option>
                 <option value="URGENT">🟠 URGENT - Requires quick action</option>
                 <option value="CRITICAL">🔴 CRITICAL - Immediate attention required</option>
               </select>
+              <label className="md-label" htmlFor="escalation-priority"><strong>Priority Level:</strong></label>
             </div>
 
-            <div className="form-group" style={{ marginBottom: 15 }}>
-              <label><strong>Escalate To (Optional):</strong></label>
-              <select 
-                value={escalationData.escalateToUserId} 
-                onChange={(e) => setEscalationData(prev => ({ ...prev, escalateToUserId: e.target.value }))}
-                style={{ width: '100%', padding: 10, marginTop: 5, border: '1px solid #ccc', borderRadius: 4 }}
-              >
+            <div className={`md-field ${escalationData.escalateToUserId ? 'has-value' : ''}`} style={{ marginBottom: 15 }}>
+              <select id="escalation-to" className="md-input" value={escalationData.escalateToUserId} onChange={(e) => setEscalationData(prev => ({ ...prev, escalateToUserId: e.target.value }))}>
                 <option value="">General escalation (no specific user)</option>
                 {officersAndAdmins.map(user => (
                   <option key={user.id} value={user.id}>
@@ -1317,19 +1287,15 @@ const AdminDashboard = () => {
                   </option>
                 ))}
               </select>
+              <label className="md-label" htmlFor="escalation-to"><strong>Escalate To (Optional):</strong></label>
               <small style={{ color: '#666', fontSize: '12px', marginTop: '5px', display: 'block' }}>
                 Leave blank for general escalation, or select a specific admin/officer to handle this escalation.
               </small>
             </div>
 
-            <div className="form-group" style={{ marginBottom: 15 }}>
-              <label><strong>Additional Comments:</strong></label>
-              <textarea
-                value={escalationData.comment}
-                onChange={(e) => setEscalationData(prev => ({ ...prev, comment: e.target.value }))}
-                placeholder="Provide additional context about why this complaint needs escalation..."
-                style={{ width: '100%', minHeight: 80, padding: 10, marginTop: 5, border: '1px solid #ccc', borderRadius: 4 }}
-              />
+            <div className={`md-field ${escalationData.comment ? 'has-value' : ''}`} style={{ marginBottom: 15 }}>
+              <textarea id="escalation-comments" className="md-input" value={escalationData.comment} onChange={(e) => setEscalationData(prev => ({ ...prev, comment: e.target.value }))} placeholder="Provide additional context about why this complaint needs escalation..." />
+              <label className="md-label" htmlFor="escalation-comments"><strong>Additional Comments:</strong></label>
             </div>
 
             <div style={{ 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { notificationService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import './NotificationCenter.css';
@@ -13,54 +13,50 @@ const NotificationCenter = () => {
   const [hasMore, setHasMore] = useState(true);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchUnreadCount();
-      fetchNotifications();
-      
-      // Poll for new notifications every 30 seconds
-      const interval = setInterval(fetchUnreadCount, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [user]);
-
-  const fetchNotifications = async (pageNum = 0, append = false) => {
+  const fetchNotificationsCb = useCallback(async (pageNum = 0, append = false) => {
     if (!user) return;
-    
     try {
       setLoading(true);
       const response = await notificationService.getUserNotifications(pageNum, 10);
       const newNotifications = response.data.content || [];
-      
       if (append) {
         setNotifications(prev => [...prev, ...newNotifications]);
       } else {
         setNotifications(newNotifications);
       }
-      
       setHasMore(!response.data.last);
       setPage(pageNum);
+      setError('');
     } catch (err) {
       console.error('Error fetching notifications:', err);
-      // Don't set error state on fetch failure - just silently fail
       setNotifications([]);
+      setError('Failed to fetch notifications');
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCountCb = useCallback(async () => {
     if (!user) return;
-    
     try {
       const response = await notificationService.getUnreadCount();
       setUnreadCount(response.data.unreadCount || 0);
     } catch (err) {
-      // Silently fail - don't log every error
-      // This is just a notification count, not critical
       setUnreadCount(0);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUnreadCountCb();
+      fetchNotificationsCb();
+      const interval = setInterval(fetchUnreadCountCb, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user, fetchNotificationsCb, fetchUnreadCountCb]);
+
+  // wrapper functions use the callbacks
+  const fetchNotifications = (pageNum = 0, append = false) => fetchNotificationsCb(pageNum, append);
 
   const markAsRead = async (notificationId) => {
     try {
@@ -136,18 +132,22 @@ const NotificationCenter = () => {
   return (
     <div className="notification-center">
       <button 
+        id="notification-bell"
         className="notification-bell"
         onClick={() => setIsOpen(!isOpen)}
         title="Notifications"
+        aria-haspopup="true"
+        aria-controls="notification-dropdown"
+        aria-expanded={isOpen}
       >
         🔔
         {unreadCount > 0 && (
-          <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+          <span className="notification-badge" aria-live="polite">{unreadCount > 99 ? '99+' : unreadCount}</span>
         )}
       </button>
 
       {isOpen && (
-        <div className="notification-dropdown">
+        <div id="notification-dropdown" className="notification-dropdown" role="menu" aria-labelledby="notification-bell">
           <div className="notification-header">
             <h3>Notifications</h3>
             {unreadCount > 0 && (
@@ -155,6 +155,7 @@ const NotificationCenter = () => {
                 className="mark-all-read-btn"
                 onClick={markAllAsRead}
                 title="Mark all as read"
+                aria-label="Mark all as read"
               >
                 Mark all read
               </button>
@@ -178,7 +179,10 @@ const NotificationCenter = () => {
                 <div 
                   key={notification.id} 
                   className={`notification-item ${!notification.read ? 'unread' : ''}`}
+                  role="menuitem"
+                  tabIndex={0}
                   onClick={() => !notification.read && markAsRead(notification.id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); !notification.read && markAsRead(notification.id); } }}
                 >
                   <div className="notification-icon" style={{ color: getTypeColor(notification.type) }}>
                     {getNotificationIcon(notification.type)}
@@ -220,6 +224,7 @@ const NotificationCenter = () => {
               <button 
                 className="load-more-btn"
                 onClick={loadMore}
+                aria-label="Load more notifications"
               >
                 Load more notifications
               </button>

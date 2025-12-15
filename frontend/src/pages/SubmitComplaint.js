@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { complaintService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import MaterialButton from '../components/MaterialButton';
 
 const SubmitComplaint = () => {
   const { user } = useAuth();
@@ -93,9 +94,8 @@ const SubmitComplaint = () => {
           Logged in as: <strong>{user?.username}</strong>
         </p>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Category</label>
-            <select name="category" value={formData.category} onChange={handleChange} required>
+          <div className={`md-field ${formData.category ? 'has-value' : ''}`}>
+            <select id="complaint-category" className="md-input" name="category" value={formData.category} onChange={handleChange} required>
               <option value="">Select Category</option>
               <option value="TECHNICAL">Technical</option>
               <option value="BILLING">Billing</option>
@@ -109,43 +109,36 @@ const SubmitComplaint = () => {
               <option value="FEEDBACK">Feedback</option>
               <option value="OTHER">Other</option>
             </select>
+            <label className="md-label" htmlFor="complaint-category">Category</label>
           </div>
-          <div className="form-group">
-            <label>Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              placeholder="Describe your complaint in detail..."
-            />
+          <div className={`md-field ${formData.description ? 'has-value' : ''}`}>
+            <textarea id="complaint-description" className="md-input" name="description" value={formData.description} onChange={handleChange} required placeholder="Describe your complaint in detail..." />
+            <label className="md-label" htmlFor="complaint-description">Description</label>
           </div>
-          <div className="form-group">
-            <label>Urgency</label>
-            <select name="urgency" value={formData.urgency} onChange={handleChange} required>
+          <div className={`md-field ${formData.urgency ? 'has-value' : ''}`}>
+            <select id="complaint-urgency" className="md-input" name="urgency" value={formData.urgency} onChange={handleChange} required>
               <option value="LOW">Low</option>
               <option value="MEDIUM">Medium</option>
               <option value="HIGH">High</option>
             </select>
+            <label className="md-label" htmlFor="complaint-urgency">Urgency</label>
           </div>
-          <div className="form-group">
-            <label>Attachment (Optional)</label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept="image/*,video/*,.pdf,.doc,.docx"
-            />
+          <div className={`md-field ${file ? 'has-value' : ''}`}>
+            <input id="complaint-file" type="file" className="md-input" onChange={handleFileChange} accept="image/*,video/*,.pdf,.doc,.docx" />
+            <label className="md-label" htmlFor="complaint-file">Attachment (Optional)</label>
             <small style={{ color: '#666', fontSize: '12px', marginTop: '5px', display: 'block' }}>
               Supported formats: Images, Videos (MP4, AVI, MOV, etc.), PDF, DOC, DOCX. Max size: 50MB
             </small>
           </div>
-          <div className="form-group">
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <label htmlFor="complaint-anonymous" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
               <input
+                id="complaint-anonymous"
                 type="checkbox"
                 name="anonymous"
                 checked={formData.anonymous}
                 onChange={handleChange}
+                aria-label="Submit as anonymous"
                 style={{ width: 'auto' }}
               />
               Submit as Anonymous (won't be able to track)
@@ -153,9 +146,9 @@ const SubmitComplaint = () => {
           </div>
           {error && <div className="error">{error}</div>}
           {success && <div className="success">{success}</div>}
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+          <MaterialButton type="submit" variant="contained" fullWidth>
             Submit Complaint
-          </button>
+          </MaterialButton>
         </form>
       </div>
     </div>

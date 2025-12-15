@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import NotificationCenter from './NotificationCenter';
 
 const Navbar = () => {
-  const { user, logout, isAdmin, isOfficer, isStaff } = useAuth();
+  const { user, logout, isAdmin, isOfficer } = useAuth();
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   const getUserRole = () => {
     if (isAdmin()) return 'Administrator';
@@ -12,110 +13,115 @@ const Navbar = () => {
     return 'User';
   };
 
-  // Debug: Log user roles
+  const toggleDrawer = (open) => () => setDrawerOpen(open);
+  const drawerCloseRef = React.useRef(null);
+
   React.useEffect(() => {
-    if (user) {
-      console.log('Current user:', user);
-      console.log('User roles:', user.roles);
-      console.log('isAdmin():', isAdmin());
-      console.log('isOfficer():', isOfficer());
+    const onKey = (e) => {
+      if (e.key === 'Escape' && drawerOpen) setDrawerOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [drawerOpen]);
+
+  React.useEffect(() => {
+    if (drawerOpen) {
+      setTimeout(() => drawerCloseRef.current?.focus?.(), 0);
     }
-  }, [user, isAdmin, isOfficer]);
+  }, [drawerOpen]);
 
   return (
-    <div className="navbar">
-      <div className="d-flex align-items-center gap-2">
-        <h1>🎯 ResolveIT Smart</h1>
+    <header className="md-appbar md-elevation-2" role="banner">
+      <div className="md-appbar-left">
+        <button aria-label="Open menu" aria-controls="main-drawer" aria-expanded={drawerOpen} className="icon-btn ripple md-hide-desktop" onClick={toggleDrawer(true)}>
+          <span className="material-icons">menu</span>
+        </button>
+        <Link to="/" className="brand ripple" aria-label="ResolveIT Home">
+          <span className="material-icons md-brand-icon">support_agent</span>
+          <span className="brand-text">ResolveIT</span>
+        </Link>
       </div>
-      <nav>
-        <Link to="/">🏠 Home</Link>
-        
+
+      <nav className="md-appbar-nav md-hide-mobile" role="navigation" aria-label="Primary Navigation">
+        <Link to="/" className="md-nav-link">Home</Link>
         {!user && (
           <>
-            <Link to="/login">🔐 Login</Link>
-            <Link to="/signup">📝 Sign Up</Link>
-            <Link to="/anonymous">📝 Anonymous Report</Link>
+            <Link to="/login" className="md-nav-link">Login</Link>
+            <Link to="/signup" className="md-nav-link">Sign Up</Link>
+            <Link to="/anonymous" className="md-nav-link">Anonymous Report</Link>
           </>
         )}
-        
-        {/* Regular Users - Only show if user is NOT admin and NOT officer */}
         {user && !isAdmin() && !isOfficer() && (
           <>
-            <Link to="/submit-complaint">📝 Submit Complaint</Link>
-            <Link to="/my-complaints">📋 My Complaints</Link>
+            <Link to="/submit-complaint" className="md-nav-link">Submit Complaint</Link>
+            <Link to="/my-complaints" className="md-nav-link">My Complaints</Link>
           </>
         )}
-        
-        {/* Admin Users - Show admin dashboard */}
         {user && isAdmin() && (
-          <Link to="/admin/dashboard">👨‍💼 Admin Dashboard</Link>
+          <Link to="/admin/dashboard" className="md-nav-link">Admin Dashboard</Link>
         )}
-        
-        {/* Officer Users - Show officer dashboard (officers should not see user options) */}
         {user && isOfficer() && (
-          <Link to="/officer/dashboard">👮‍♂️ Officer Dashboard</Link>
+          <Link to="/officer/dashboard" className="md-nav-link">Officer Dashboard</Link>
         )}
-        
-        {/* Reports - Show for Admin and Officer users */}
         {user && (isAdmin() || isOfficer()) && (
-          <Link to="/reports">📊 Reports</Link>
-        )}
-        
-        {user && (
-          <div className="d-flex align-items-center gap-3" style={{ marginLeft: 'var(--space-4)' }}>
-            <NotificationCenter />
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 'var(--space-2)',
-              padding: 'var(--space-2) var(--space-3)',
-              backgroundColor: 'var(--primary-50)',
-              borderRadius: 'var(--radius-lg)',
-              border: '1px solid var(--primary-200)'
-            }}>
-              <div style={{
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: 'var(--font-size-sm)',
-                fontWeight: 600
-              }}>
-                {user.username?.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <div style={{ 
-                  fontWeight: 600, 
-                  fontSize: 'var(--font-size-sm)',
-                  color: 'var(--primary-700)'
-                }}>
-                  {user.username}
-                </div>
-                <div style={{ 
-                  fontSize: 'var(--font-size-xs)', 
-                  color: 'var(--primary-600)',
-                  fontWeight: 500
-                }}>
-                  {getUserRole()}
-                </div>
-              </div>
-            </div>
-            <a 
-              href="#" 
-              onClick={logout} 
-              style={{ cursor: 'pointer' }}
-              className="btn btn-secondary btn-sm"
-            >
-              🚪 Logout
-            </a>
-          </div>
+          <Link to="/reports" className="md-nav-link">Reports</Link>
         )}
       </nav>
-    </div>
+
+      <div className="md-appbar-right">
+        <div className="icon-btn ripple" aria-hidden="false">
+          <NotificationCenter />
+        </div>
+
+        {user ? (
+          <div className="user-chip md-elevation-1">
+            <div className="avatar">{user.username?.charAt(0).toUpperCase()}</div>
+            <div className="user-info">
+              <div className="user-name">{user.username}</div>
+              <div className="user-role">{getUserRole()}</div>
+            </div>
+            <button aria-label="Logout" className="icon-btn" onClick={logout}>
+              <span className="material-icons">logout</span>
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Mobile Drawer */}
+      <div id="main-drawer" className={`md-drawer ${drawerOpen ? 'open' : ''}`} role="dialog" aria-modal="true" aria-hidden={!drawerOpen}>
+        <div id="main-drawer-sheet" className="md-drawer-sheet" aria-hidden={!drawerOpen}>
+          <button ref={drawerCloseRef} className="drawer-close icon-btn" aria-label="Close menu" onClick={toggleDrawer(false)}>
+            <span className="material-icons">close</span>
+          </button>
+          <nav className="drawer-nav">
+            <Link to="/" onClick={toggleDrawer(false)}>Home</Link>
+            {!user && (
+              <>
+                <Link to="/login" onClick={toggleDrawer(false)}>Login</Link>
+                <Link to="/signup" onClick={toggleDrawer(false)}>Sign Up</Link>
+                <Link to="/anonymous" onClick={toggleDrawer(false)}>Anonymous Report</Link>
+              </>
+            )}
+            {user && !isAdmin() && !isOfficer() && (
+              <>
+                <Link to="/submit-complaint" onClick={toggleDrawer(false)}>Submit Complaint</Link>
+                <Link to="/my-complaints" onClick={toggleDrawer(false)}>My Complaints</Link>
+              </>
+            )}
+            {user && isAdmin() && (
+              <Link to="/admin/dashboard" onClick={toggleDrawer(false)}>Admin Dashboard</Link>
+            )}
+            {user && isOfficer() && (
+              <Link to="/officer/dashboard" onClick={toggleDrawer(false)}>Officer Dashboard</Link>
+            )}
+            {user && (isAdmin() || isOfficer()) && (
+              <Link to="/reports" onClick={toggleDrawer(false)}>Reports</Link>
+            )}
+          </nav>
+        </div>
+        <div className="md-drawer-backdrop" onClick={toggleDrawer(false)} />
+      </div>
+    </header>
   );
 };
 

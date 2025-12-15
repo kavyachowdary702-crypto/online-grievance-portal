@@ -41,7 +41,8 @@ function App() {
     <AuthProvider>
       <Router>
         <Navbar />
-        <Routes>
+        <main className="md-main container">
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
@@ -86,7 +87,10 @@ function App() {
               </PrivateRoute>
             } 
           />
-        </Routes>
+          </Routes>
+        </main>
+        {/* Global snackbar/toast area (for later use) */}
+        <div id="md-snackbar" aria-live="polite" />
       </Router>
     </AuthProvider>
   );

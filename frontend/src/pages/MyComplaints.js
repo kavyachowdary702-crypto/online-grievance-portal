@@ -115,7 +115,7 @@ const MyComplaints = () => {
         </div>
       ) : (
         <div className="card">
-          <table className="table">
+          <table className="md-table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -131,23 +131,23 @@ const MyComplaints = () => {
             <tbody>
               {complaints.map(complaint => (
                 <tr key={complaint.id}>
-                  <td>{complaint.id}</td>
-                  <td>{complaint.category}</td>
-                  <td style={{ maxWidth: '250px' }}>
+                  <td data-label="ID">{complaint.id}</td>
+                  <td data-label="Category">{complaint.category}</td>
+                  <td data-label="Description" style={{ maxWidth: '250px' }}>
                     {complaint.description.substring(0, 80)}
                     {complaint.description.length > 80 ? '...' : ''}
                   </td>
-                  <td>
+                  <td data-label="Urgency">
                     <span className={`urgency-badge ${getUrgencyClass(complaint.urgency)}`}>
                       {complaint.urgency}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Status">
                     <span className={`status-badge ${getStatusClass(complaint.status)}`}>
                       {complaint.status.replace('_', ' ')}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Assigned Officer">
                     {complaint.assignedToUsername ? (
                       <span style={{ color: '#2196f3', fontWeight: 'bold' }}>
                         👮‍♂️ {complaint.assignedToUsername}
@@ -158,7 +158,7 @@ const MyComplaints = () => {
                       </span>
                     )}
                   </td>
-                  <td>
+                  <td data-label="Deadline">
                     {complaint.deadline ? (
                       <span 
                         className={`deadline-${getDeadlineStatus(complaint.deadline, complaint.status) || 'normal'}`}
@@ -175,7 +175,7 @@ const MyComplaints = () => {
                       </span>
                     )}
                   </td>
-                  <td>{formatDate(complaint.createdAt)}</td>
+                  <td data-label="Submitted">{formatDate(complaint.createdAt)}</td>
                 </tr>
               ))}
             </tbody>

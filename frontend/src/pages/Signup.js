@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/api';
+import MaterialButton from '../components/MaterialButton';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -47,61 +48,35 @@ const Signup = () => {
       <div className="card" style={{ maxWidth: '500px', margin: '50px auto' }}>
         <h2 style={{  }}>Sign Up</h2>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Username</label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              minLength="3"
-            />
+          <div className={`md-field ${formData.username ? 'has-value' : ''}`}>
+            <input id="signup-username" className="md-input" type="text" name="username" value={formData.username} onChange={handleChange} required minLength="3" />
+            <label className="md-label" htmlFor="signup-username">Username</label>
           </div>
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
+          <div className={`md-field ${formData.email ? 'has-value' : ''}`}>
+            <input id="signup-email" className="md-input" type="email" name="email" value={formData.email} onChange={handleChange} required />
+            <label className="md-label" htmlFor="signup-email">Email</label>
           </div>
-          <div className="form-group">
-            <label>Full Name</label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              required
-            />
+          <div className={`md-field ${formData.fullName ? 'has-value' : ''}`}>
+            <input id="signup-fullname" className="md-input" type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
+            <label className="md-label" htmlFor="signup-fullname">Full Name</label>
           </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength="6"
-            />
+          <div className={`md-field ${formData.password ? 'has-value' : ''}`}>
+            <input id="signup-password" className="md-input" type="password" name="password" value={formData.password} onChange={handleChange} required minLength="6" />
+            <label className="md-label" htmlFor="signup-password">Password</label>
           </div>
-          <div className="form-group">
-            <label>Role</label>
-            <select name="role" value={formData.role} onChange={handleChange}>
+          <div className={`md-field ${formData.role ? 'has-value' : ''}`}>
+            <select id="signup-role" className="md-input" name="role" value={formData.role} onChange={handleChange}>
               <option value="USER">User</option>
               <option value="ADMIN">Admin</option>
               <option value="OFFICER">Officer</option>
             </select>
+            <label className="md-label" htmlFor="signup-role">Role</label>
           </div>
           {error && <div className="error">{error}</div>}
           {success && <div className="success">{success}</div>}
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+          <MaterialButton type="submit" variant="contained" fullWidth>
             Sign Up
-          </button>
+          </MaterialButton>
         </form>
         <p style={{ marginTop: '20px', textAlign: 'center' }}>
           Already have an account? <Link to="/login">Login</Link>

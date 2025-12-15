@@ -15,6 +15,7 @@ import {
 } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import './Reports.css';
+import MaterialButton from '../components/MaterialButton';
 
 // Register Chart.js components
 ChartJS.register(
@@ -101,51 +102,36 @@ const Reports = () => {
     }
   }, [user, isAdmin, isOfficer, hasAccess]);
 
-  useEffect(() => {
-    if (hasAccess) {
-      loadInitialData();
-    }
-  }, [hasAccess]);
-
-  const loadInitialData = async () => {
+  const loadInitialData = React.useCallback(async () => {
     try {
       setLoading(true);
       setError(null); // Clear any previous errors
       console.log('Loading dashboard data with filters:', filters);
-      
+
       const [dashboardResponse, filtersResponse] = await Promise.all([
         reportService.getDashboardStats(filters),
         reportService.getFilterOptions()
       ]);
-      
+
       console.log('Dashboard response:', dashboardResponse);
       console.log('Filters response:', filtersResponse);
-      
+
       setDashboardData(dashboardResponse.data);
       setFilterOptions(filtersResponse.data);
     } catch (err) {
       console.error('Dashboard loading error details:', err);
       console.error('Error response:', err.response);
-      
-      let errorMessage = 'Failed to load dashboard data';
-      
-      if (err.code === 'NETWORK_ERROR' || err.message?.includes('Network Error')) {
-        errorMessage = '🔌 Cannot connect to server. Please ensure the backend is running on port 8081.';
-      } else if (err.response?.status === 401) {
-        errorMessage = '🔐 Authentication failed. Please login again.';
-      } else if (err.response?.status === 403) {
-        errorMessage = '⛔ Access denied. You need Admin or Officer privileges.';
-      } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else {
-        errorMessage = err.message || 'Unknown error occurred';
-      }
-      
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    if (hasAccess) {
+      loadInitialData();
+    }
+  }, [hasAccess, loadInitialData]);
+      
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -399,13 +385,9 @@ const Reports = () => {
               </div>
             )}
             {(error.includes('🔐') || error.includes('⛔')) && (
-              <button 
-                onClick={() => window.location.reload()} 
-                className="btn-primary"
-                style={{ marginTop: '10px' }}
-              >
+              <MaterialButton onClick={() => window.location.reload()} variant="contained" style={{ marginTop: '10px' }}>
                 Refresh Page
-              </button>
+              </MaterialButton>
             )}
           </div>
         )}
@@ -422,7 +404,7 @@ const Reports = () => {
                 type="date"
                 value={filters.startDate}
                 onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                className="filter-input"
+                className="filter-input form-control"
               />
             </div>
             
@@ -432,7 +414,7 @@ const Reports = () => {
                 type="date"
                 value={filters.endDate}
                 onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                className="filter-input"
+                className="filter-input form-control"
               />
             </div>
 
@@ -444,7 +426,7 @@ const Reports = () => {
                   multiple
                   value={filters.categories}
                   onChange={(e) => handleFilterChange('categories', Array.from(e.target.selectedOptions, option => option.value))}
-                  className="filter-select"
+                  className="filter-select form-control"
                   style={{ height: '80px' }}
                 >
                   {filterOptions.categories.map(category => (
@@ -462,7 +444,7 @@ const Reports = () => {
                   multiple
                   value={filters.statuses}
                   onChange={(e) => handleFilterChange('statuses', Array.from(e.target.selectedOptions, option => option.value))}
-                  className="filter-select"
+                  className="filter-select form-control"
                   style={{ height: '80px' }}
                 >
                   {filterOptions.statuses.map(status => (
@@ -475,49 +457,15 @@ const Reports = () => {
 
           <div className="filters-actions">
             <div className="filters-buttons">
-              <button
-                onClick={applyFilters}
-                disabled={loading}
-                className={`btn-primary ${loading ? 'btn-disabled' : ''}`}
-              >
-                {loading ? 'Applying...' : 'Apply Filters'}
-              </button>
-              
-              <button
-                onClick={resetFilters}
-                disabled={loading}
-                className="btn-secondary"
-              >
-                {loading ? 'Resetting...' : 'Reset'}
-              </button>
-              
-              <button
-                onClick={loadInitialData}
-                disabled={loading}
-                className="btn-retry"
-                title="Retry loading dashboard data"
-              >
-                {loading ? '🔄' : '🔄 Retry'}
-              </button>
+              <MaterialButton onClick={applyFilters} variant="contained" disabled={loading}>{loading ? 'Applying...' : 'Apply Filters'}</MaterialButton>
+              <MaterialButton onClick={resetFilters} variant="outlined" disabled={loading}>{loading ? 'Resetting...' : 'Reset'}</MaterialButton>
+              <MaterialButton onClick={loadInitialData} variant="text" disabled={loading} title="Retry loading dashboard data">{loading ? '🔄' : '🔄 Retry'}</MaterialButton>
             </div>
 
             {/* Export buttons */}
             <div className="export-buttons">
-              <button
-                onClick={() => handleExport('csv')}
-                disabled={exporting.csv || loading}
-                className={`btn-export-csv ${(exporting.csv || loading) ? 'btn-disabled' : ''}`}
-              >
-                {exporting.csv ? 'Exporting...' : 'Export CSV'}
-              </button>
-              
-              <button
-                onClick={() => handleExport('pdf')}
-                disabled={exporting.pdf || loading}
-                className={`btn-export-pdf ${(exporting.pdf || loading) ? 'btn-disabled' : ''}`}
-              >
-                {exporting.pdf ? 'Exporting...' : 'Export PDF'}
-              </button>
+              <MaterialButton onClick={() => handleExport('csv')} variant="outlined" disabled={exporting.csv || loading}>{exporting.csv ? 'Exporting...' : 'Export CSV'}</MaterialButton>
+              <MaterialButton onClick={() => handleExport('pdf')} variant="outlined" disabled={exporting.pdf || loading}>{exporting.pdf ? 'Exporting...' : 'Export PDF'}</MaterialButton>
             </div>
           </div>
         </div>
@@ -645,7 +593,7 @@ const Reports = () => {
               <div className="table-card">
                 <h3 className="chart-title">📊 Category Breakdown</h3>
                 <div className="table-responsive">
-                  <table className="modern-table">
+                  <table className="md-table">
                     <thead>
                       <tr>
                         <th>Category</th>
@@ -657,10 +605,10 @@ const Reports = () => {
                     <tbody>
                       {dashboardData.complaintsByCategory.map((category, index) => (
                         <tr key={index}>
-                          <td>{category.category}</td>
-                          <td>{category.count}</td>
-                          <td>{category.resolved}</td>
-                          <td>
+                          <td data-label="Category">{category.category}</td>
+                          <td data-label="Total">{category.count}</td>
+                          <td data-label="Resolved">{category.resolved}</td>
+                          <td data-label="Resolution Rate">
                             <span className={`resolution-badge ${
                               category.resolutionRate >= 80 ? 'high' :
                               category.resolutionRate >= 60 ? 'medium' : 'low'
