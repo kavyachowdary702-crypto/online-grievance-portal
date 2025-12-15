@@ -1,3 +1,5 @@
+
+
 {
   "name": "resolveit-frontend",
   "version": "1.0.0",
@@ -35,7 +37,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8080",
+  "proxy": "http://localhost:8081",
   "devDependencies": {
     "puppeteer": "^24.33.0"
   }
